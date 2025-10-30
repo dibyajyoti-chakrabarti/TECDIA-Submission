@@ -52,7 +52,7 @@ mkdir results
 
 ### 5. Fix File name in main.py
 
-In the line `frames = extract_frames("videos/jumbled_video.mp4")`
+In the line `video_path = "videos/jumbled_video.mp4")` on `line number 101`
 
 Change `jumbled_video.mp4` with the name of the video to be reconstructed.
 

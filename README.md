@@ -13,3 +13,12 @@ source venv/bin/activate
 ```
 pip install -r requirements.txt
 ```
+3. Store video:
+```
+mkdir videos
+```
+***And store you video in this directory***
+4. Test and tune:
+```
+python main.py --input videos/video_name.mp4 --output reconstructed.mp4 --fps 30
+```

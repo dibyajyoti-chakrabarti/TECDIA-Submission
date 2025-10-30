@@ -64,7 +64,7 @@ python3 main.py
 
 You can either navigate to the `results` directory and manually play the video or use the following command:
 ```
-cvlc videos/jumbled_video.mp4  
+cvlc results/reconstructed.mp4  
 ```
 ## Algorithm Explanation
 ### 1. Approach Overview

@@ -1,10 +1,15 @@
 # Jumbled Frames Reconstruction
 
 ## Overview
-This program attempts to reconstruct the original ordering of frames from a shuffled video (10s, 30 fps). It first tries a very fast centroid-based method using a background median. If that fails, it falls back to a deep-feature similarity + spectral ordering method.
+
+This project performs **video frame reordering** to reconstruct the original temporal sequence from a jumbled video.  
+It assumes the input video contains a **single moving object** (for example, a walking person) against a **static background**.
+
+The reconstruction is based on analyzing the **horizontal movement** of the object across frames using **centroid tracking**.
+
 
 ## Setup
-1. Create a virtualenv (optional):
+1. Create a virtualenv:
 ```
 python -m venv venv
 source venv/bin/activate
@@ -13,12 +18,20 @@ source venv/bin/activate
 ```
 pip install -r requirements.txt
 ```
-3. Store video:
+3. Create a Directory for Videos:
 ```
 mkdir videos
 ```
-***And store you video in this directory***
-4. Test and tune:
+**And store you video in this directory**
+
+4. Create a Directory for Resultant Videos:
 ```
-python main.py --input videos/video_name.mp4 --output reconstructed.mp4 --fps 30
+mkdir results
+```
+
+**main.py will generate the resultant video here**
+
+5. Create the Reconstructed Video:
+```
+python3 main.py
 ```

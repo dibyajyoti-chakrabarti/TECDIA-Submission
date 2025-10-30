@@ -7,13 +7,14 @@ It assumes the input video contains a **single moving object** (for example, a w
 
 The reconstruction is based on analyzing the **horizontal movement** of the object across frames using **centroid tracking**.
 
-## Note
+## Note (READ THIS CAREFULLY)
 
 - The entire project was created and run on a Linux OS and as such, some commands might vary according to the host OS.
 - If you are using Windows, please verify beforehand if the commands are Windows compatible.
 - You can either use ChatGPT or any other AI tools for doing this.
 - Please run the following commands in <ins>**Terminal**</ins> and not VS code's in-built Terminal.
 - Instances of VS Code crashing are common.
+- main.py has 6 steps. The 2nd step involves computing complete centroid-based ordering. This step is the most compute-heavy step and the terminal might freeze for a few seconds. In case the terminal crashes, restart the PC and try running main.py again.
 
 ## Cloning the repository
 ### 1. Create a project folder

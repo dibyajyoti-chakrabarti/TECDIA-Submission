@@ -5,3 +5,11 @@ This program attempts to reconstruct the original ordering of frames from a shuf
 
 ## Setup
 1. Create a virtualenv (optional):
+```
+python -m venv venv
+source venv/bin/activate
+```
+2. Install dependencies:
+```
+pip install -r requirements.txt
+```

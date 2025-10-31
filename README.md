@@ -35,7 +35,7 @@ source venv/bin/activate
 ```
 For Windows OS
 ```
-python -m venv venv
+cd TECDIA-Submission/python -m venv venv
 venv\Scripts\activate
 ```
 

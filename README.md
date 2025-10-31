@@ -24,9 +24,8 @@ cd project
 ```
 ### 2. Initialize git and clone
 ```
-git init
-git clone https://github.com/dibyajyoti-chakrabarti/reconstruct_frames.git
-cd reconstruct_frames/
+git clone https://github.com/dibyajyoti-chakrabarti/TECDIA-Submission.git
+cd TECDIA-Submission/
 ```
 ## Setup
 ### 1. Create a virtualenv

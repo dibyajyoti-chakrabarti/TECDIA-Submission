@@ -1,6 +1,3 @@
 venv/
 videos/
-__pycache__/
-timing.log
-videos/
 results/

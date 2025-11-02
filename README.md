@@ -45,8 +45,7 @@ source venv/bin/activate
 ```
 
 **For Windows OS:**
-```bash
-cd TECDIA-Submission
+```
 python -m venv venv
 venv\Scripts\activate
 ```

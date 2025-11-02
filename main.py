@@ -7,10 +7,7 @@ import os
 # =========================================================
 
 def extract_frames(path):
-    """
-    Step 1: Extract frames from the input video.
-    Reads all frames in sequential order and returns them as a list.
-    """
+    """Extracts all frames from the video in sequential order."""
     cap = cv2.VideoCapture(path)
     frames = []
     while True:
@@ -23,10 +20,7 @@ def extract_frames(path):
 
 
 def save_video(frames, path, fps=30):
-    """
-    Step 2: Save frames as a video.
-    Reconstructs a video from a list of frames at the given frame rate.
-    """
+    """Saves the provided frames as a video file."""
     h, w = frames[0].shape[:2]
     os.makedirs(os.path.dirname(path), exist_ok=True)
     writer = cv2.VideoWriter(path, cv2.VideoWriter_fourcc(*"mp4v"), fps, (w, h))
@@ -36,18 +30,12 @@ def save_video(frames, path, fps=30):
 
 
 def compute_background(frames):
-    """
-    Step 3: Compute a static background.
-    Uses the median of all frames to estimate a clean background.
-    """
+    """Computes the median background image."""
     return np.median(np.stack(frames, axis=0), axis=0).astype(np.uint8)
 
 
 def centroid_mask(frame, bg):
-    """
-    Step 4: Create a binary mask isolating the moving object.
-    Compares each frame with the background and thresholds the difference.
-    """
+    """Generates a binary mask highlighting the moving object."""
     diff = cv2.absdiff(frame, bg)
     gray = cv2.cvtColor(diff, cv2.COLOR_BGR2GRAY)
     _, mask = cv2.threshold(gray, 30, 255, cv2.THRESH_BINARY)
@@ -56,10 +44,7 @@ def centroid_mask(frame, bg):
 
 
 def compute_centroids(frames, bg):
-    """
-    Step 5: Compute horizontal centroids for all frames.
-    Determines the object's approximate x-position in each frame.
-    """
+    """Computes horizontal centroid positions for each frame."""
     centroids = []
     for frame in frames:
         mask = centroid_mask(frame, bg)
@@ -69,7 +54,6 @@ def compute_centroids(frames, bg):
         else:
             centroids.append(np.nan)
 
-    # Handle missing centroid values using interpolation
     centroids = np.array(centroids)
     idx = np.arange(len(centroids))
     good = ~np.isnan(centroids)
@@ -78,11 +62,8 @@ def compute_centroids(frames, bg):
     return centroids
 
 
-def zoom_frame(frame, factor=1.8):
-    """
-    Step 6: Zoom into the center of the frame.
-    This improves visibility of small objects by enlarging the region of interest.
-    """
+def zoom_frame(frame, factor=1.5):
+    """Zooms into the center region by a given factor."""
     h, w = frame.shape[:2]
     new_h, new_w = int(h / factor), int(w / factor)
     y1 = (h - new_h) // 2
@@ -97,41 +78,51 @@ def zoom_frame(frame, factor=1.8):
 # =========================================================
 
 if __name__ == "__main__":
-    # Step 1: Specify input and output details
     video_path = "videos/jumbled_video.mp4"
     output_path = "results/reconstructed.mp4"
     fps = 30
-    split_point = 180  # First 6 seconds (at 30 fps) are considered correct
+
+    # Define breakpoints (in frames)
+    bp1 = 90   # 3 seconds
+    bp2 = 180  # 6 seconds
 
     print("Step 1: Extracting frames from input video...")
     frames = extract_frames(video_path)
     print(f"Total frames extracted: {len(frames)}")
 
-    # Step 2: Compute centroid-based full reconstruction
+    # Step 2: Compute the initial full ordering
     print("Step 2: Performing full centroid-based ordering...")
     bg_full = compute_background(frames)
     cx_full = compute_centroids(frames, bg_full)
-    order_full = np.argsort(cx_full)[::-1]  # Reverse for correct direction
+    order_full = np.argsort(cx_full)[::-1]
     ordered_frames = [frames[i] for i in order_full]
 
-    # Step 3: Split into stable (head) and unstable (tail) parts
-    print("Step 3: Splitting ordered frames into head (first 180) and tail (remaining frames)...")
-    head = ordered_frames[:split_point]
-    tail = ordered_frames[split_point:]
+    # Step 3: Split into three logical segments
+    print("Step 3: Splitting into segments at 3s and 6s marks...")
+    seg1 = ordered_frames[:bp1]         # 0–3s (stable)
+    seg2 = ordered_frames[bp1:bp2]      # 3–6s (medium zoom)
+    seg3 = ordered_frames[bp2:]         # 6–10s (strong zoom)
 
-    # Step 4: Refine the tail by re-ordering after zooming in
-    print("Step 4: Refining tail region using zoomed-in centroid computation...")
-    zoomed_tail = [zoom_frame(f, factor=1.8) for f in tail]
-    bg_tail = compute_background(zoomed_tail)
-    cx_tail = compute_centroids(zoomed_tail, bg_tail)
-    order_tail = np.argsort(cx_tail)[::-1]
-    refined_tail = [tail[i] for i in order_tail]
+    # Step 4: Reorder mid and tail segments after zoom
+    print("Step 4: Refining mid (3–6s) with moderate zoom...")
+    zoomed_seg2 = [zoom_frame(f, factor=1.4) for f in seg2]
+    bg2 = compute_background(zoomed_seg2)
+    cx2 = compute_centroids(zoomed_seg2, bg2)
+    order2 = np.argsort(cx2)[::-1]
+    refined_seg2 = [seg2[i] for i in order2]
 
-    # Step 5: Merge head and refined tail
-    print("Step 5: Combining the stable head and refined tail...")
-    final_frames = head + refined_tail
+    print("Step 5: Refining tail (6–10s) with stronger zoom...")
+    zoomed_seg3 = [zoom_frame(f, factor=1.8) for f in seg3]
+    bg3 = compute_background(zoomed_seg3)
+    cx3 = compute_centroids(zoomed_seg3, bg3)
+    order3 = np.argsort(cx3)[::-1]
+    refined_seg3 = [seg3[i] for i in order3]
 
-    # Step 6: Save the final reconstructed video
-    print("Step 6: Saving the reconstructed video...")
+    # Step 6: Merge all refined parts
+    print("Step 6: Combining all refined segments...")
+    final_frames = seg1 + refined_seg2 + refined_seg3
+
+    # Step 7: Save final output
+    print("Step 7: Saving the final reconstructed video...")
     save_video(final_frames, output_path, fps=fps)
     print(f"Reconstruction completed successfully. Video saved at: {output_path}")
